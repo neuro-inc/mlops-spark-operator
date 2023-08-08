@@ -74,7 +74,7 @@ def main(verbose: int) -> None:
 )
 @wrap_async()
 async def list(namespace: str) -> None:
-    "Listing Spark Operator installations in cluster"
+    "Listing Spark operator installations in cluster"
     try:
         releases = await SparkOperatorController().list_releases(namespace)
     except Exception as e:
@@ -84,10 +84,54 @@ async def list(namespace: str) -> None:
 
 
 @main.command()
-def install() -> None:
-    # Install new instance of spark operator,
-    # specifying some parameters, printing kubectl to console
-    pass
+@click.option(
+    "-n",
+    "--namespace",
+    type=str,
+    default="all",
+    show_default=True,
+    help=(
+        "Namespace, where Spark operator will be installed. "
+        "Only one operator per namespace could be installed."
+    ),
+)
+@click.option(
+    "-s",
+    "--set",
+    type=(str, str),
+    multiple=True,
+    help="Set chart values",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.File("w"),
+    default=sys.stdout,
+    help="Generate Kubectl for installed Spark operator",
+)
+@click.argument(
+    "release-name",
+    required=True,
+)
+@wrap_async()
+async def install(
+    namespace: str,
+    output: click.File,
+    set: list[tuple[str, str]],
+    release_name: str,
+) -> None:
+    """Install new instance of Spark operator"""
+    controller = SparkOperatorController()
+    try:
+        release = await controller.install(namespace, release_name, values=dict(set))
+    except Exception as e:
+        click.echo(f"Exception while installing Spark operator: {str(e)}", err=True)
+
+    try:
+        kubectl = await controller.get_kubectl_config(release.namespace)
+        click.echo(kubectl, file=output)
+    except Exception as e:
+        click.echo(f"Exception while generating kubectl: {str(e)}", err=True)
 
 
 @main.command()
@@ -103,17 +147,19 @@ def uninstall() -> None:
     type=str,
     default="all",
     show_default=True,
-    help="Show operators in specified namespace, or all namespaces.",
+    help="Generates kubectl config for operator in specified namespace.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.File("w"),
     default=sys.stdout,
+    show_default=True,
+    help="Filename, where kubectl will be dumped.",
 )
 @wrap_async()
 async def get_kubectl_config(namespace: str | None, output: click.File) -> None:
-    "Generates and shows kubectl config for a given Spark Operator installation"
+    "Generates and shows kubectl config for a given Spark operator installation"
     controller = SparkOperatorController()
     try:
         kubectl = await controller.get_kubectl_config(namespace)

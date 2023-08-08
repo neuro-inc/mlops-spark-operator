@@ -13,6 +13,9 @@ import yaml
 logger = logging.getLogger()
 
 
+SPARK_OPERATOR_CHART_NAME = "charts/spark-operator"
+
+
 class HelmException(Exception):
     pass
 
@@ -91,31 +94,25 @@ class HelmClient(BaseCLIRunner):
         self,
         release_name: str,
         chart_name: str,
+        namespace: str,
         *,
         version: str = "",
         values: dict[str, Any] | None = None,
         install: bool = False,
         wait: bool = False,
-        timeout_s: int | None = None,
-        username: str = "",
-        password: str = "",
+        timeout_s: int = 600,
     ) -> None:
         options = self._cli_options.add(
             version=version or None,
             values="-",
             install=install,
             wait=wait,
-            timeout=f"{timeout_s}s" if timeout_s is not None else None,
-            username=username or None,
-            password=password or None,
+            timeout=f"{timeout_s}s",
+            namespace=namespace,
+            create_namespace=True,
         )
-        logger.info(
-            "Running helm upgrade %s %s %s",
-            release_name,
-            chart_name,
-            options.masked,
-        )
-        cmd = f"helm upgrade {release_name} {chart_name} {options!s}"
+        logger.info(f"Running helm upgrade {release_name} {chart_name}")
+        cmd = f"helm upgrade {release_name} {chart_name} {options}"
         values_yaml = yaml.safe_dump(values or {})
         process, _, stderr_text = await self._run(
             cmd,

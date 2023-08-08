@@ -73,9 +73,8 @@ def main(verbose: int) -> None:
     help="Show operators in specified namespace, or all namespaces.",
 )
 @wrap_async()
-async def list(namespace: str | None, **kwargs) -> None:
+async def list(namespace: str) -> None:
     "Listing Spark Operator installations in cluster"
-
     try:
         releases = await SparkOperatorController().list_releases(namespace)
     except Exception as e:

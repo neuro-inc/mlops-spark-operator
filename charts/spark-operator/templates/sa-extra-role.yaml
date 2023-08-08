@@ -8,6 +8,6 @@ rules:
     resources: [sparkapplications]
     verbs: ["*"]
   - apiGroups: [""]
-    resources: ["pods/log", pods/portforward]
-    verbs: ["get", "create"]
+    resources: [pods, services, pods/log, pods/portforward, configmaps]
+    verbs: ["*"]
 {{- end }}

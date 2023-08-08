@@ -15,10 +15,10 @@ class SparkOperatorController:
         self._helm_client = HelmClient(global_cli_options)
         self._kube_client = KubeClient(global_cli_options)
 
-    async def list_releases(self, namespace: str | None) -> Release:
+    async def list_releases(self, namespace: str) -> Release:
         return await self._helm_client.list_releases(namespace)
 
-    async def get_kubectl_config(self, namespace: str | None) -> str:
+    async def get_kubectl_config(self, namespace: str) -> str:
         releases = await self._helm_client.list_releases(namespace)
         assert releases, f"No releases found in {namespace=}"
         assert len(releases) == 1, f"Found more than one release in {namespace=}"

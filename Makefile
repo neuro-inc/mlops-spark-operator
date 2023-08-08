@@ -1,3 +1,5 @@
+include k8s.mk
+
 setup:
 	pip install -U pip
 	pip install -e .[dev]
@@ -18,9 +20,3 @@ test_unit:
 
 test_integration:
 	pytest -vv --maxfail=3 --cov-report xml:.coverage-integration.xml tests/integration
-
-docker_build:
-	rm -rf build dist
-	pip install -U build
-	python -m build
-	docker build -t platformsparkoperator:latest .

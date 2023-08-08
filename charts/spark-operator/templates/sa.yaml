@@ -1,0 +1,6 @@
+{{- if .Values.rbac.extraPermissions.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.rbac.extraPermissions.serviceAccountName }}
+{{- end }}

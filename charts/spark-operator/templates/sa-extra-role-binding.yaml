@@ -2,13 +2,13 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ .Values.rbac.extraPermissions.roleBindingName }}
+  name: {{ .Values.rbac.extraPermissions.serviceAccountName }}
 subjects:
   - kind: ServiceAccount
-    name:  {{ index .Values "spark-operator" "serviceAccounts" "spark" "name" }}
+    name:  {{ .Values.rbac.extraPermissions.serviceAccountName }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ .Values.rbac.extraPermissions.roleName }}
+  name: {{ .Values.rbac.extraPermissions.serviceAccountName }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}

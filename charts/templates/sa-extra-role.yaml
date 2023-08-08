@@ -1,0 +1,13 @@
+{{- if .Values.rbac.extraPermissions.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.rbac.extraPermissions.roleName }}
+rules:
+  - apiGroups: ["sparkoperator.k8s.io"]
+    resources: [sparkapplications]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: ["pods/log", pods/portforward]
+    verbs: ["get", "create"]
+{{- end }}

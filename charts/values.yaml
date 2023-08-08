@@ -1,0 +1,16 @@
+rbac:
+  extraPermissions:
+    enabled: true
+    # serviceAccountName: spark-apps-editor
+    roleName: spark-apps-editor
+    roleBindingName: spark-apps-editor
+
+spark-operator:
+  webhook:
+    enable: true
+  rbac:
+    createClusterRole: false
+  serviceAccounts:
+    spark:
+      create: true
+      name: spark

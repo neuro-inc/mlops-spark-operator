@@ -3,76 +3,36 @@
 Used to deploy [Spark operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator) instance into the underlying k8s cluster.
 
 
-## Using Neuro Spark operator CLI
+## Quick start
 Requires Helm v3+ to be installed and available in CLI.
 
-- Install Spark operator
+- Install Spark operator.
 ```bash
-platform-spark install spark-teamname --namespace spark-team
+platform-spark install spark-team --output kubeconfig
 ```
+This will also generate kubectl config and dump it into specified in `--output` parameter path (cwd `kubeconfig` file).
+
+This config could be used by end users to manage Spark Applications and pods within the specific namespace during installation ("spark-team" in this case).
 
 - List installations
 ```bash
-platform-spark list [--namespace namespace]
+platform-spark list
 ```
 
-- Generate kubectl config, which could be used to manage Spark Applications of Spark operator within the specific namespace.
-
+- Deploy basic Spark app (on the user behalf, check output)
 ```bash
-platform-spark get-kubectl-config spark-team --output /path/to/cfg
+export KUBECONFIG=`pwd`/kubeconfig
+kubectl apply -f tests/k8s/spark-app-pi.yaml
+kubectl get sparkapplication
+kubectl logs spark-pi-driver -f
 ```
 
-- Deploy Spark app (on the user behalf)
-```bash
-export KUBECONFIG=/path/to/cfg
-kubectl apply -f
-```
+Note, Spark app driver in [tests/k8s/spark-app-pi.yaml](tests/k8s/spark-app-pi.yaml) assumes the default service account name (spark-apps-editor), which might be customized.
 
-- Remove operator
+- Remove Spark app and operator
 ```bash
+kubectl delete -f tests/k8s/spark-app-pi.yaml
+unset KUBECONFIG
 platform-spark uninstall spark-team
+rm kubeconfig
 ```
-
-
-## Direct Helm:
-Deploy using Helm directly:
-```bash
-helm install spark-teamname charts --namespace spark-team --create-namespace
-```
-
-Generate kubeconfig
-```bash
-%%bash
-clusterName='my-cluster'
-server=`kubectl cluster-info | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' | grep 'control plane' | awk '{print $NF}'`
-namespace='spark-team'
-serviceAccountName='spark'
-secretName=$(kubectl --namespace="$namespace" get serviceAccount "$serviceAccountName" -o=jsonpath='{.secrets[0].name}')
-
-ca=$(kubectl --namespace="$namespace" get secret/"$secretName" -o=jsonpath='{.data.ca\.crt}')
-token=$(kubectl --namespace="$namespace" get secret/"$secretName" -o=jsonpath='{.data.token}' | base64 --decode)
-
-echo "
----
-apiVersion: v1
-kind: Config
-clusters:
-  - name: ${clusterName}
-    cluster:
-      certificate-authority-data: ${ca}
-      server: ${server}
-contexts:
-  - name: ${serviceAccountName}@${clusterName}
-    context:
-      cluster: ${clusterName}
-      namespace: ${namespace}
-      user: ${serviceAccountName}
-users:
-  - name: ${serviceAccountName}
-    user:
-      token: ${token}
-current-context: ${serviceAccountName}@${clusterName}
-" > sa_kubect.yaml
-```
-
-Now you could use the generated Kubeconfig to manage Spark apps and pods in the underlying namespace.

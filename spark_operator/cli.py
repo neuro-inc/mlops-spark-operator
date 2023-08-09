@@ -85,15 +85,11 @@ async def list(namespace: str) -> None:
 
 @main.command()
 @click.option(
-    "-n",
-    "--namespace",
+    "--release-name",
     type=str,
-    default="all",
+    default="platform-spark",
     show_default=True,
-    help=(
-        "Namespace, where Spark operator will be installed. "
-        "Only one operator per namespace could be installed."
-    ),
+    help="Helm chart release name.",
 )
 @click.option(
     "-s",
@@ -110,26 +106,28 @@ async def list(namespace: str) -> None:
     help="Generate Kubectl for installed Spark operator",
 )
 @click.argument(
-    "release-name",
+    "namespace",
     required=True,
 )
 @wrap_async()
 async def install(
-    namespace: str,
-    output: click.File,
+    release_name: str | None,
+    output: t.IO,
     set: list[tuple[str, str]],
-    release_name: str,
+    namespace: str | None,
 ) -> None:
     """Install new instance of Spark operator"""
     controller = SparkOperatorController()
     try:
         release = await controller.install(namespace, release_name, values=dict(set))
+        click.echo(f"Installed Spark operator into {namespace} namespace")
     except Exception as e:
         click.echo(f"Exception while installing Spark operator: {str(e)}", err=True)
 
     try:
         kubectl = await controller.get_kubectl_config(release.namespace)
         click.echo(kubectl, file=output)
+        click.echo(f"Generated Kubectl config dumped into '{output.name}'")
     except Exception as e:
         click.echo(f"Exception while generating kubectl: {str(e)}", err=True)
 

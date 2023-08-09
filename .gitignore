@@ -132,3 +132,5 @@ dmypy.json
 
 # Helm chart releaser
 .cr-release-packages
+
+kubeconfig

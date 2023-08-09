@@ -69,3 +69,15 @@ class SparkOperatorController:
             len(releases) == 1
         ), "More than one Spark operator found after installation"
         return releases[0]
+
+    async def uninstall(self, namespace: str) -> None:
+        releases = await self.list_releases(namespace)
+        assert releases, f"No release found in the namespace {namespace}"
+        assert (
+            len(releases) == 1
+        ), f"More than one release found in the namespace {namespace}"
+
+        release = releases[0]
+
+        await self._helm_client.delete(release.name, release.namespace, wait=True)
+        await self._kube_client.delete("namespace", release.namespace)

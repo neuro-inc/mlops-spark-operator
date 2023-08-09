@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import base64
 from dataclasses import dataclass
@@ -87,3 +89,15 @@ class KubeClient(BaseCLIRunner):
         return KUBECONFIG_TEMPLATE.format(
             cluster_info=cluster_info, sa_info=service_account_info
         )
+
+    async def delete(
+        self,
+        res_type: str,
+        res_name: str,
+        namespace: str | None = None,
+    ) -> None:
+        cli_opts = self._cli_options
+        if namespace:
+            cli_opts = cli_opts.add(namespace=namespace)
+        cmd = f"kubectl delete {res_type}/{res_name} {cli_opts}"
+        await self._run(cmd)

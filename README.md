@@ -1,26 +1,38 @@
-# Neuro Spark Operator
+# Neuro Spark operator
 
-Used to deploy [Spark Operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator) instance into the underlying k8s cluster.
+Used to deploy [Spark operator](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator) instance into the underlying k8s cluster.
 
 
-## Using Neuro Spark Operator CLI
+## Using Neuro Spark operator CLI
 Requires Helm v3+ to be installed and available in CLI.
 
-TODO: install
+- Install Spark operator
+```bash
+platform-spark install spark-teamname --namespace spark-team
+```
 
-### List installations
+- List installations
 ```bash
 platform-spark list [--namespace namespace]
 ```
 
-Will list installations in all namespaces of the cluster (unless the namespace option is provided). The release name, version and namespace will be included.
+- Generate kubectl config, which could be used to manage Spark Applications of Spark operator within the specific namespace.
 
-### Generating kubectl config
 ```bash
-platform-spark get-kubectl-config NAMESPACE [--output FILE]
+platform-spark get-kubectl-config spark-team --output /path/to/cfg
 ```
 
-Will generate config for Kubectl CLI tool, which could be used to manage Spark Applications of Spark Operator within the specific namespace.
+- Deploy Spark app (on the user behalf)
+```bash
+export KUBECONFIG=/path/to/cfg
+kubectl apply -f
+```
+
+- Remove operator
+```bash
+platform-spark uninstall spark-team
+```
+
 
 ## Direct Helm:
 Deploy using Helm directly:

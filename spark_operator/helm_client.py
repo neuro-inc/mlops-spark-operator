@@ -132,14 +132,16 @@ class HelmClient(BaseCLIRunner):
     async def delete(
         self,
         release_name: str,
+        namespace: str,
         wait: bool = False,
-        timeout_s: int | None = None,  # default 5m
+        timeout_s: int = 600,
     ) -> None:
         options = self._cli_options.add(
             wait=wait,
+            namespace=namespace,
             timeout=f"{timeout_s}s" if timeout_s else None,
         )
-        cmd = f"helm delete {release_name} {options!s}"
+        cmd = f"helm delete {release_name} {options}"
         logger.info("Running %s", cmd)
         process, _, stderr_text = await self._run(
             cmd,

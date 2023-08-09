@@ -135,9 +135,19 @@ async def install(
 
 
 @main.command()
-def uninstall() -> None:
-    # Uninstall instance of spark operator
-    pass
+@click.argument(
+    "namespace",
+    required=True,
+)
+@wrap_async()
+async def uninstall(namespace: str) -> None:
+    "Uninstall instance of spark operator"
+    controller = SparkOperatorController()
+    try:
+        await controller.uninstall(namespace)
+        click.echo(f"Spark operator was removed from the namespace {namespace}")
+    except Exception as e:
+        click.echo(str(e))
 
 
 @main.command()

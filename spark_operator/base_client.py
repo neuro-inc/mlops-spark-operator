@@ -3,7 +3,11 @@ from __future__ import annotations
 import asyncio
 import typing as t
 import shlex
+import logging
 from asyncio import subprocess
+
+
+LOGGER = logging.getLogger()
 
 
 class CLIOptions:
@@ -56,6 +60,7 @@ class BaseCLIRunner:
         capture_stderr: bool = False,
     ) -> tuple[subprocess.Process, str, str]:
         input_bytes = input_text.encode("utf-8")
+        LOGGER.debug(f"Command '{cmd}'")
         process = await asyncio.create_subprocess_shell(
             cmd,
             stdin=subprocess.PIPE if input_bytes else None,
@@ -65,4 +70,7 @@ class BaseCLIRunner:
         stdout, stderr = await process.communicate(input_bytes or None)
         stdout_text = (stdout or b"").decode("utf-8")
         stderr_text = (stderr or b"").decode("utf-8")
+        LOGGER.debug(
+            f"Command output for '{cmd[:20]}...': {stdout_text=} {stderr_text=}"
+        )
         return (process, stdout_text, stderr_text)

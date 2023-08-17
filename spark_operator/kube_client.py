@@ -64,9 +64,15 @@ class KubeClient(BaseCLIRunner):
     ) -> ServiceAccountInfo:
         base_opts = self._cli_options.add(namespace=namespace)
 
-        secret_name_opts = base_opts.add(output="jsonpath='{.secrets[0].name}'")
+        secret_name_opts = base_opts.add(output="jsonpath={.secrets[0].name}")
         secret_name_cmd = f"kubectl get serviceAccount {sa_name} {secret_name_opts}"
         _, secret_name, _ = await self._run(secret_name_cmd, capture_stdout=True)
+
+        if not secret_name:
+            # We seem to be using a newer version of k8s,
+            # which does not create SA secrets automatically
+            # However, we create a dedicated secret for SA in helm squal to SA name
+            secret_name = sa_name
 
         sa_secret_opts = base_opts.add(output="json")
         get_sa_secret_cmd = f"kubectl get secret {secret_name} {sa_secret_opts}"

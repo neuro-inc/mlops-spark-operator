@@ -75,12 +75,11 @@ def main(verbose: int) -> None:
 @wrap_async()
 async def list(namespace: str) -> None:
     "Listing Spark operator installations in cluster"
-    try:
-        releases = await SparkOperatorController().list_releases(namespace)
-    except Exception as e:
-        click.echo(str(e), err=True)
+    releases = await SparkOperatorController().list_releases(namespace)
     for release in releases:
         click.echo(str(release))
+    if not releases:
+        click.echo(f"No Spark operator installations found")
 
 
 @main.command()
@@ -118,18 +117,12 @@ async def install(
 ) -> None:
     """Install new instance of Spark operator"""
     controller = SparkOperatorController()
-    try:
-        release = await controller.install(namespace, release_name, values=dict(set))
-        click.echo(f"Installed Spark operator into {namespace} namespace")
-    except Exception as e:
-        click.echo(f"Exception while installing Spark operator: {str(e)}", err=True)
+    release = await controller.install(namespace, release_name, values=dict(set))
+    click.echo(f"Installed Spark operator into {namespace} namespace")
 
-    try:
-        kubectl = await controller.get_kubectl_config(release.namespace)
-        click.echo(kubectl, file=output)
-        click.echo(f"Generated Kubectl config dumped into '{output.name}'")
-    except Exception as e:
-        click.echo(f"Exception while generating kubectl: {str(e)}", err=True)
+    kubectl = await controller.get_kubectl_config(release.namespace)
+    click.echo(kubectl, file=output)
+    click.echo(f"Generated Kubectl config dumped into '{output.name}'")
 
 
 @main.command()
@@ -141,11 +134,8 @@ async def install(
 async def uninstall(namespace: str) -> None:
     "Uninstall instance of spark operator"
     controller = SparkOperatorController()
-    try:
-        await controller.uninstall(namespace)
-        click.echo(f"Spark operator was removed from the namespace {namespace}")
-    except Exception as e:
-        click.echo(str(e))
+    await controller.uninstall(namespace)
+    click.echo(f"Spark operator was removed from the namespace {namespace}")
 
 
 @main.command()
@@ -169,8 +159,5 @@ async def uninstall(namespace: str) -> None:
 async def get_kubectl_config(namespace: str | None, output: click.File) -> None:
     "Generates and shows kubectl config for a given Spark operator installation"
     controller = SparkOperatorController()
-    try:
-        kubectl = await controller.get_kubectl_config(namespace)
-        click.echo(kubectl, file=output)
-    except Exception as e:
-        click.echo(str(e), err=True)
+    kubectl = await controller.get_kubectl_config(namespace)
+    click.echo(kubectl, file=output)

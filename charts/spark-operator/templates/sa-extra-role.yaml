@@ -4,10 +4,22 @@ kind: Role
 metadata:
   name: {{ .Values.rbac.extraPermissions.serviceAccountName }}
 rules:
-  - apiGroups: ["sparkoperator.k8s.io"]
-    resources: [sparkapplications]
-    verbs: ["*"]
-  - apiGroups: [""]
-    resources: [pods, services, pods/log, pods/portforward, configmaps]
-    verbs: ["*"]
+  - apiGroups:
+    - sparkoperator.k8s.io
+    resources:
+    - sparkapplications
+    verbs:
+    - "*"
+  - apiGroups:
+    - ""
+    resources:
+      - pods
+      - services
+      - pods/log
+      - pods/portforward
+      - configmaps
+      - persistentvolumeclaims
+      - persistentvolumeclaims/status
+    verbs:
+    - "*"
 {{- end }}

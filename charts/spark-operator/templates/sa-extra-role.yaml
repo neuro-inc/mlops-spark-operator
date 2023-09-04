@@ -1,0 +1,25 @@
+{{- if .Values.rbac.extraPermissions.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.rbac.extraPermissions.serviceAccountName }}
+rules:
+  - apiGroups:
+    - sparkoperator.k8s.io
+    resources:
+    - sparkapplications
+    verbs:
+    - "*"
+  - apiGroups:
+    - ""
+    resources:
+      - pods
+      - services
+      - pods/log
+      - pods/portforward
+      - configmaps
+      - persistentvolumeclaims
+      - persistentvolumeclaims/status
+    verbs:
+    - "*"
+{{- end }}

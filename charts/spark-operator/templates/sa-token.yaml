@@ -1,0 +1,9 @@
+{{- if .Values.rbac.extraPermissions.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.rbac.extraPermissions.serviceAccountName }}
+  annotations:
+    kubernetes.io/service-account.name: {{ .Values.rbac.extraPermissions.serviceAccountName }}
+type: kubernetes.io/service-account-token
+{{- end }}

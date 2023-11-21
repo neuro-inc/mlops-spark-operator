@@ -4,7 +4,7 @@ Used to deploy [Spark operator](https://github.com/GoogleCloudPlatform/spark-on-
 
 
 ## Quick start
-Requires Helm v3+ to be installed and available in CLI.
+Requires Helm v3.13+ to be installed and available in CLI.
 
 - Install Spark operator.
 ```bash

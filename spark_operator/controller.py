@@ -21,7 +21,8 @@ class SparkOperatorController:
         self._kube_client = KubeClient(global_cli_options)
 
     async def list_releases(self, namespace: str) -> list[Release]:
-        return await self._helm_client.list_releases(namespace)
+        labels = self._get_release_labels()
+        return await self._helm_client.list_releases(namespace, labels)
 
     async def get_kubectl_config(self, namespace: str) -> str:
         releases = await self._helm_client.list_releases(namespace)
@@ -56,11 +57,13 @@ class SparkOperatorController:
             raise RuntimeError(f"Found existing installation in {namespace=}")
 
         # Create a new release
+        release_labels = self._get_release_labels(release_name)
         await self._helm_client.upgrade(
             release_name=release_name,
             chart_name=SPARK_OPERATOR_CHART_NAME,
             namespace=namespace,
             values=values,
+            labels=release_labels,
             install=True,
             wait=True,
         )
@@ -81,3 +84,9 @@ class SparkOperatorController:
 
         await self._helm_client.delete(release.name, release.namespace, wait=True)
         await self._kube_client.delete("namespace", release.namespace)
+
+    def _get_release_labels(self, release_name: str | None = None) -> tuple[str]:
+        res = ("app=platform-spark-operator",)
+        if release_name:
+            res += (f"platform-spark-operator={release_name}",)
+        return res

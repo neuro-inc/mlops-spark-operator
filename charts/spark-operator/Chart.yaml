@@ -7,3 +7,4 @@ dependencies:
   - name: spark-operator
     version: "1.1.27"
     repository: https://googlecloudplatform.github.io/spark-on-k8s-operator
+    condition: spark-operator.enabled

@@ -50,11 +50,15 @@ class Release:
 
 
 class HelmClient(BaseCLIRunner):
-    async def list_releases(self, namespace: str | None = None) -> list[Release]:
+    async def list_releases(
+        self, namespace: str | None = None, labels: tuple[str] = ()
+    ) -> list[Release]:
         if not namespace or namespace.lower() == "all":
             options = self._cli_options.add(all_namespaces=True, output="json")
         else:
             options = self._cli_options.add(namespace=namespace, output="json")
+        if labels:
+            options = options.add(selector=",".join(labels))
         cmd = f"helm list {options}"
         logger.info("Running %s", cmd)
         process, stdout_text, stderr_text = await self._run(
@@ -101,6 +105,7 @@ class HelmClient(BaseCLIRunner):
         install: bool = False,
         wait: bool = False,
         timeout_s: int = 600,
+        labels: tuple[str] = (),
     ) -> None:
         options = self._cli_options.add(
             version=version or None,
@@ -110,9 +115,10 @@ class HelmClient(BaseCLIRunner):
             timeout=f"{timeout_s}s",
             namespace=namespace,
             create_namespace=True,
+            labels=f'{",".join(labels)}',
         )
-        logger.info(f"Running helm upgrade {release_name} {chart_name}")
         cmd = f"helm upgrade {release_name} {chart_name} {options}"
+        logger.info(f"Running {cmd}")
         values_yaml = yaml.safe_dump(values or {})
         process, _, stderr_text = await self._run(
             cmd,

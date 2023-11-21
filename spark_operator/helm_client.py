@@ -31,6 +31,12 @@ class ReleaseStatus(enum.Enum):
     PENDINGUPGRADE = "pending-upgrade"
     PENDINGROLLBACK = "pending-rollback"
 
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return str(self)
+
 
 @dataclass(frozen=True)
 class Release:
@@ -38,6 +44,7 @@ class Release:
     namespace: str
     chart: str
     status: ReleaseStatus
+    updated: str
 
     @classmethod
     def parse(cls, payload: dict[str, Any]) -> Release:
@@ -46,6 +53,7 @@ class Release:
             namespace=payload["namespace"],
             chart=payload["chart"],
             status=ReleaseStatus(payload["status"]),
+            updated=payload["updated"],
         )
 
 

@@ -4,6 +4,7 @@ rbac:
     serviceAccountName: spark-apps-editor
 
 spark-operator:
+  enabled: false
   webhook:
     enable: true
   serviceAccounts:
